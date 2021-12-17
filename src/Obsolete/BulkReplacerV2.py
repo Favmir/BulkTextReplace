@@ -14,6 +14,16 @@ WORKBOOK_PATH =  os.path.join(WORKBOOK_LOC, WORKBOOK_FILENAME)
 def OpenFile():
     os.startfile(WORKBOOK_PATH)
 
+def PreviewChange(wordlist):
+    for filename in glob.glob('*.txt'):
+        with open(os.path.join(CONTENT_LOC, filename), 'r') as f:
+            content = f.read()
+            for numrow, row in enumerate(wordlist, start = 1):
+                matches = re.findall(row[0], content)
+            for match in matches:
+                print(match)
+            f.close()
+
 def ReplaceText(wordlist: list[list[str]]):
     files = ''
     for filename in glob.glob('*.txt'):
@@ -21,18 +31,20 @@ def ReplaceText(wordlist: list[list[str]]):
         with open(os.path.join(CONTENT_LOC, filename), 'r+', encoding = 'utf-8') as f:
             content = f.read()
             for numrow, row in enumerate(wordlist, start = 1):
-                content = re.sub(row[0], row[1], content, flags = re.M)
+                content = re.sub(row[0], row[1], content, flags = re.M)            
             f.seek(0)
             f.write(content)
             f.truncate()
             f.close()
     print('Replaced texts in files: ', files)
+    
 
 # Load workbook (needed for assgining commands to gui buttons)
 with open(WORKBOOK_PATH, newline = '', encoding = 'utf-8') as f:
     csvReader = csv.reader(f, delimiter='\t', quotechar = '\x07', quoting = csv.QUOTE_NONE)
     wordlist = list(csvReader)
     print('Loaded workbook: ',wordlist)
+
 
 # Gui
 rootwindow = Tk()
@@ -69,6 +81,17 @@ tv_keywords.heading('comment', text='Comment', anchor=CENTER)
 for numrow, row in enumerate(wordlist, start = 0):
     tv_keywords.insert(parent = '', index = numrow, text = '', values = row)
 
+tv_preview = Treeview(rootwindow)
+tv_preview['oolumns'] = ('before', 'after', 'filepath')
+tv_preview.column('#0', width=0, stretch=NO)
+tv_preview.column('before', anchor=CENTER, width=250)
+tv_preview.column('after', anchor=CENTER, width=250)
+tv_preview.column('filepath', anchor=CENTER, width=250)
+tv_preview.heading('#0', text='', anchor=CENTER)
+tv_preview.heading('before', text='Original Text', anchor=CENTER)
+tv_preview.heading('after', text='Changed Text', anchor=CENTER)
+tv_preview.heading('filepath', text='Located at', anchor=CENTER)
+
 
 btn_run = Button(
     master = rootwindow,
@@ -79,6 +102,7 @@ lbl_title.grid(row = 0, column = 0, sticky = N, pady = 5)
 btn_openSheet.grid(row = 1, column = 0, sticky = W, pady = 2)
 btn_preview.grid(row = 1, column = 1, padx = 10)
 tv_keywords.grid(row =  2, column = 1, padx = 10, pady = 5)
+tv_preview.grid(row =  2, column = 2, padx = 10)
 btn_run.grid(row = 3, column = 0, pady = 10)
 
 
