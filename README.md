@@ -1,5 +1,5 @@
 # BulkTextReplace
- Python script that replaces regex text for all `.txt` files in a folder
+ Python script that find & replace for all `.txt` files in a folder
 
 
 Note:
@@ -7,6 +7,7 @@ The `BulkReplacer.py` script needs a csv file named `BulkReplacer_List.csv` form
 
 Example of `BulkReplacer_List.csv`:
 ```
+Your fine. You're fine. Fixes grammar
 ([^…])…([^…])	\1……\2	Doulbe the Ellipses
 ([^\n "—])(—[\s])	\1 \2	Spacing for Em Dash
 (\s)-(\s)	\1—\2	Turn Hyphen into Em Dash
