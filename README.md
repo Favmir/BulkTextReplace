@@ -1,9 +1,8 @@
-# BulkTextReplace
- Python script that find & replace for all `.txt` files in a folder with multiple regular expressions.
+# Bulk Text Replacer
+#### Python script that find & replace for all `.txt` files in a folder with multiple regular expressions.
 
 
-Note:
-The `BulkReplacer.py` script needs a csv file named `BulkReplacer_List.csv`. It needs to be formatted in `utf-8-sig` and use comma(,) as delimiter — basically, the standard dialect Microsoft Excel uses.
+The `BulkReplacer.py` script needs a csv file named `BulkReplacer_List.csv`. It needs to be formatted in `utf-8-sig` and use comma(,) as delimiter — basically, the standard dialect Microsoft Excel uses. The program will generate a csv file for you if there isn't one.
 
 Example of `BulkReplacer_List.csv`:
 ```
@@ -22,4 +21,4 @@ This translates to:
 | (\s)-(\s)         | \1—\2         | Turn Hyphen into Em Dash              |
 | ([0-9])-([0-9])   | \1–\2         | For numbers, turn Hyphen into En Dash |
 
-first column is RegEx used to find text, second column the replacement RegEx, and the third is just for comments.
+First column is the RegEx used to find text, second column the replacement RegEx. The third column does nothing — it's just for comments.
