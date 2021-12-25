@@ -1,8 +1,10 @@
 ######|| BulkReplacer Program ||######
 # Replaces text across multiple files via RegEx
-# Version 4.1(2021/12/24)
+# Version 4.2(2021/12/25)
 # Author: FavmirY@gmail.com
-# CSV Sheet file must be 'utf-8-sig' with ',' as delimiter (This was chosen because it's how excel processes .csv data)
+# CSV Sheet file must be 'utf-8-sig' with ',' as delimiter
+# (This was chosen because it's how excel processes .csv data)
+# (Excel cannot read contents of a csv file if formatted in 'utf-8')
 # .txt files getting replaced should be 'utf-8'
 
 import re
@@ -84,14 +86,14 @@ def GetFileNames(mypath: str):
 
 # returns list of (dirname, filname) for all .txt files in dirname
 def Search(dirname):
-    answer = []
+    filelist = []
     filenames = os.listdir(dirname)
     for filename in filenames:
         # full_filename = os.path.join(dirname, filename)
         ext = os.path.splitext(filename)[-1]
         if ext == '.txt': 
-            answer.append((dirname,filename))
-    return answer
+            filelist.append((dirname,filename))
+    return filelist
 
 class TreeBrowser(Frame):
     def __init__(self, master, columnslist: list, datalist: list) -> None:
@@ -189,7 +191,8 @@ btn_createSheet = Button(
 btn_openSheet = Button(
     master = frame1,
     text = 'Open RegEx Sheet',
-    command = OpenSheet)
+    command = OpenSheet
+)
 tv_keywords = TreeBrowser(frame1, ('RegEx1', 'RegEx2', 'Comment'), REGEXDATA)
 btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
@@ -200,8 +203,8 @@ tv_keywords.grid(row =  1, column = 0, columnspan= 2, padx = 10, pady = 5, stick
 tv_files = TreeBrowser(frame2, ('Path', 'Filename'), Search(CONTENT_LOC))
 btn_files = Button(
     master = frame2,
-    text = 'None',
-    command = tv_files.Update(Search(CONTENT_LOC))
+    text = 'Refresh File List',
+    command = lambda: tv_files.Update(Search(CONTENT_LOC))
 )
 tv_files.grid(row =  0, column = 0, padx = 10, pady = 5, sticky = EW)
 tv_files.tree.column(0, anchor=W)
