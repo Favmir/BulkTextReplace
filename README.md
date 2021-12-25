@@ -1,4 +1,4 @@
-# Bulk Text Replacer
+# Favmir's Bulk Text Replacer
 #### Python script that find & replace for all `.txt` files in a folder using multiple regular expressions.
 
 I made this for my translation work. Very useful when you're changing a million lines of dialog for games like Baldurs Gate 3, or for fictions like HPMOR.
