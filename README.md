@@ -1,7 +1,7 @@
 # Bulk Text Replacer
 #### Python script that find & replace for all `.txt` files in a folder using multiple regular expressions.
 
-I made this for my translation work. Very useful when you're changing million lines of dialog for games like Baldurs Gate 3, or for fictions like HPMOR.
+I made this for my translation work. Very useful when you're changing a million lines of dialog for games like Baldurs Gate 3, or for fictions like HPMOR.
 
 The `BulkReplacer.py` script needs a csv file named `BulkReplacer_List.csv`. It needs to be formatted in `utf-8-sig` and use comma(,) as delimiter — basically, the standard dialect Microsoft Excel uses. The program will generate a csv file for you if there isn't one.
 
