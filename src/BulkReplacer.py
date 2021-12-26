@@ -1,6 +1,6 @@
 ######|| BulkReplacer Program ||######
 # Replaces text across multiple files via RegEx
-# Version 4.2(2021/12/25)
+# Version 4.3(2021/12/26)
 # Author: FavmirY@gmail.com
 # CSV Sheet file must be 'utf-8-sig' with ',' as delimiter
 # (This was chosen because it's how excel processes .csv data)
@@ -52,7 +52,7 @@ def ReplaceText(wordlist: list[list[str]]):
             f.close()
     print('Replaced texts in files: ', files)
 
-def PreviewReplaceText(wordlist: list[list[str]]):
+def PreviewReplaceText(wordlist: list[list[str]]) -> list[list[str]]:
     files = ''
     matches = []
     for filename in glob.glob('*.txt'):
@@ -69,12 +69,11 @@ def PreviewReplaceText(wordlist: list[list[str]]):
                         foundtextb = restofcontent[max(0,found.span()[0]-5): min(len(restofcontent),found.span()[0])]
                         foundtexta = restofcontent[max(0,found.span()[1]): min(len(restofcontent),found.span()[1]+5)]
                         changedtext = re.sub(row[0], row[1], foundtext)
-                        matches.append( (filename, re.sub('\n', ' ↵ ','…'+foundtextb+foundtext+foundtexta+'…'), re.sub('\n', ' ↵ ', '…'+foundtextb+changedtext+foundtexta+'…')) )
+                        matches.append( (filename, re.sub('\n', '↵','…'+foundtextb+foundtext+foundtexta+'…'), re.sub('\n', '↵', '…'+foundtextb+changedtext+foundtexta+'…')) )
                         restofcontent = restofcontent[found.span()[1]:]
                     else:
                         print("found no more ", row[0])
                         restofcontent = None
-                    
             f.close()
     return matches
 
@@ -85,7 +84,7 @@ def GetFileNames(mypath: str):
     return filenames
 
 # returns list of (dirname, filname) for all .txt files in dirname
-def Search(dirname):
+def Search(dirname: str):
     filelist = []
     filenames = os.listdir(dirname)
     for filename in filenames:
@@ -99,15 +98,19 @@ class TreeBrowser(Frame):
     def __init__(self, master, columnslist: list, datalist: list) -> None:
         super().__init__(master)
         self.tree = DataTreeview(self, columnslist, datalist)
-        self.tree.pack(side = 'left', expand = True, fill = 'both')
-        verscrollbar = Scrollbar(self, orient ="vertical", command = self.tree.yview)
+        verscrollbar = Scrollbar(self, orient ='vertical', command = self.tree.yview)
+        horscrollbar = Scrollbar(self, orient = 'horizontal', command = self.tree.xview)
+        self.tree.configure(yscrollcommand = verscrollbar.set)
+        self.tree.configure(xscrollcommand = horscrollbar.set)
         verscrollbar.pack(side = 'right', fill = 'y')
-        self.tree.configure(yscrollcommand=verscrollbar.set)
+        horscrollbar.pack(side = 'bottom', fill = 'x')
+        self.tree.pack(expand = True, fill = 'both')
     def Update(self, datalist:list[list[str]]):
         self.tree.Update(datalist)
 
+
 class DataTreeview(Treeview):
-    def __init__(self, master, columnslist: list, datalist: list):      # datalist is a list of rowlists
+    def __init__(self, master, columnslist: list[str], datalist: list):      # datalist is a list of rowlists
         super().__init__(master)
         self.data = datalist
         self['columns'] = columnslist
@@ -115,10 +118,10 @@ class DataTreeview(Treeview):
         self.heading('#0', text='', anchor=CENTER)
         for colname in columnslist:
             self.column(colname, anchor = CENTER, stretch = True)
-            self.heading(colname, text = colname, anchor=CENTER)
+            self.heading(colname, text = colname, anchor=CENTER)  
         self.Update(self.data)
     
-    def Update(self, datalist):
+    def Update(self, datalist: list[list[str]]):
         self.delete(*self.get_children())
         for numrow, row in enumerate(datalist, start = 0):
             self.insert(parent = '', index = numrow, text = '', values = row)
@@ -198,7 +201,6 @@ btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
 tv_keywords.grid(row =  1, column = 0, columnspan= 2, padx = 10, pady = 5, sticky = NSEW)
 
-
 # frame2 (file browser for *.txt files)
 tv_files = TreeBrowser(frame2, ('Path', 'Filename'), Search(CONTENT_LOC))
 btn_files = Button(
@@ -225,11 +227,14 @@ btn_preview = Button(
 btn_run = Button(
     master = frame3,
     text = 'Replace in every *.txt files selected',
-    command = lambda: ReplaceText(REGEXDATA))
+    command = lambda: ReplaceText(REGEXDATA)
+)
 lbl_preview.grid(row = 0, column = 0, pady = 5)
 btn_preview.grid(row = 0, column = 1, padx = 5)
 tv_preview.grid(row = 1, column = 0, columnspan = 2, padx = 10, pady = 5, sticky = NSEW)
 tv_preview.tree.column(0, width = 120, stretch=NO, anchor=W)
+tv_preview.tree.column(1, width = 250, minwidth = 150)
+tv_preview.tree.column(2, width = 250, minwidth = 150)
 btn_run.grid(row = 2, column = 0, pady = 5)
 
 
