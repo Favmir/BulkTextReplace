@@ -2,7 +2,7 @@
 # Replaces text across multiple files via RegEx
 # Version 4.3(2021/12/26)
 # Author: FavmirY@gmail.com
-# CSV Sheet file must be 'utf-8-sig' with ',' as delimiter
+# CSV Sheet file must be '`utf-8-sig' with ',' as delimiter
 # (This was chosen because it's how excel processes .csv data)
 # (Excel cannot read contents of a csv file if formatted in 'utf-8')
 # .txt files getting replaced should be 'utf-8'
