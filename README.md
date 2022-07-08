@@ -1,17 +1,25 @@
-# BulkTextReplace
- Python script that find & replace for all `.txt` files in a folder
+# Bulk Text Replacer
+#### Python script that find & replace for all `.txt` files in a folder using multiple regular expressions.
 
+I made this for my own translation work. Very useful when you're changing a million lines of dialog for games like Baldurs Gate 3, or for fictions like HPMOR.
 
-Note:
-The `BulkReplacer.py` script needs a csv file named `BulkReplacer_List.csv` formatted in utf-8. It uses tab(\t) as delimiter, and quoting is disabled — meaning that you cannot have tab characters as input.
+The `BulkReplacer.py` script needs a csv file named `BulkReplacer_List.csv`. It needs to be formatted in `utf-8-sig` and use comma(,) as delimiter — basically, the standard dialect Microsoft Excel uses. The program will generate a csv file for you if there isn't one.
 
 Example of `BulkReplacer_List.csv`:
 ```
-Your fine. You're fine. Fixes grammar
-([^…])…([^…])	\1……\2	Doulbe the Ellipses
-([^\n "—])(—[\s])	\1 \2	Spacing for Em Dash
-(\s)-(\s)	\1—\2	Turn Hyphen into Em Dash
-([0-9])-([0-9])	\1–\2	For numbers, turn Hyphen into En Dash
+Your fine.,You're fine.,Fixes grammar
+([^…])…([^…]),\1……\2,Doulbe the Ellipses
+"([^\n ""—])(—[\s])",\1 \2,Spacing for Em Dash
+(\s)-(\s),\1—\2,Turn Hyphen into Em Dash
+([0-9])-([0-9]),\1–\2,"For numbers, turn Hyphen into En Dash"
 ```
+This translates to:
+| BEFORE            | AFTER         | COMMENT                               |
+|:-----------------:|:-------------:|:--------------------------------------|
+| Your fine.        | You're fine.  | Fixes grammar                         |
+| ([^…])…([^…])     | \1……\2        | Doulbe the Ellipses                   |
+| ([^\n "—])(—[\s]) | \1 \2         | Spacing for Em Dash                   |
+| (\s)-(\s)         | \1—\2         | Turn Hyphen into Em Dash              |
+| ([0-9])-([0-9])   | \1–\2         | For numbers, turn Hyphen into En Dash |
 
-first column is RegEx used to find text, second column the replacement RegEx, and the third is just for comments.
+First column is the RegEx used to find text, second column the replacement RegEx. The third column does nothing — it's just for comments.
