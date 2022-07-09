@@ -31,14 +31,14 @@ def CreateSheet():
     else:
         f = open(WORKBOOK_PATH, 'w', newline = '', encoding='utf-8-sig')
         writer = csv.writer(f)
-        writer.writerow(('Hi! This will be replaced by', 'this text!','This column doesn\'t do anything'))
-        writer.writerow(('This row will be run', 'after the first row.','This column doesn\'t do anything'))
+        writer.writerow(('hell', 'heck','hell will be replaced with heck(not capitalized)'))
+        writer.writerow(('([hH])ell', '\1eck','using RegEx to apply to both h and H'))
         f.close
 
 def OpenSheet():
     os.startfile(WORKBOOK_PATH)
 
-def ReplaceText(wordlist: list[list[str]]):
+def ReplaceText(wordlist: 'list[list[str]]'):
     files = ''
     for filename in glob.glob('*.txt'):
         files = files + ', ' + filename
@@ -52,7 +52,7 @@ def ReplaceText(wordlist: list[list[str]]):
             f.close()
     print('Replaced texts in files: ', files)
 
-def PreviewReplaceText(wordlist: list[list[str]]) -> list[list[str]]:
+def PreviewReplaceText(wordlist: 'list[list[str]]') -> 'list[list[str]]':
     files = ''
     matches = []
     for filename in glob.glob('*.txt'):
@@ -105,12 +105,12 @@ class TreeBrowser(Frame):
         verscrollbar.pack(side = 'right', fill = 'y')
         horscrollbar.pack(side = 'bottom', fill = 'x')
         self.tree.pack(expand = True, fill = 'both')
-    def Update(self, datalist:list[list[str]]):
+    def Update(self, datalist: 'list[list[str]]'):
         self.tree.Update(datalist)
 
 
 class DataTreeview(Treeview):
-    def __init__(self, master, columnslist: list[str], datalist: list):      # datalist is a list of rowlists
+    def __init__(self, master, columnslist: 'list[str]', datalist: 'list'):      # datalist is a list of rowlists
         super().__init__(master)
         self.data = datalist
         self['columns'] = columnslist
@@ -121,7 +121,7 @@ class DataTreeview(Treeview):
             self.heading(colname, text = colname, anchor=CENTER)  
         self.Update(self.data)
     
-    def Update(self, datalist: list[list[str]]):
+    def Update(self, datalist: 'list[list[str]]'):
         self.delete(*self.get_children())
         for numrow, row in enumerate(datalist, start = 0):
             self.insert(parent = '', index = numrow, text = '', values = row)
