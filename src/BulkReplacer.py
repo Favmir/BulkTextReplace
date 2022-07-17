@@ -15,10 +15,11 @@ import os
 import csv
 import sys
 
-
-CONTENT_LOC = os.getcwd()
+# os.getcwd() gives you current working directory
+# os.path.dirname(os.path.abspath(__file__)) gives you location of python script
+CONTENT_LOC = os.path.dirname(os.path.abspath(__file__))
 WORKBOOK_FILENAME = 'BulkReplacer_List.csv'
-WORKBOOK_LOC = os.getcwd()
+WORKBOOK_LOC = os.path.dirname(os.path.abspath(__file__))
 WORKBOOK_PATH =  os.path.join(WORKBOOK_LOC, WORKBOOK_FILENAME)
 REGEXDATA = []
 
@@ -32,7 +33,7 @@ def CreateSheet():
         f = open(WORKBOOK_PATH, 'w', newline = '', encoding='utf-8-sig')
         writer = csv.writer(f)
         writer.writerow(('hell', 'heck','hell will be replaced with heck(not capitalized)'))
-        writer.writerow(('([hH])ell', '\1eck','using RegEx to apply to both h and H'))
+        writer.writerow(('([hH])ell', '\\1eck','using RegEx to turn \'hell\' into \'heck\', and \'Hell\' into \'Heck\''))
         f.close
 
 def OpenSheet():
@@ -62,14 +63,19 @@ def PreviewReplaceText(wordlist: 'list[list[str]]') -> 'list[list[str]]':
             for row in wordlist:
                 restofcontent = content
                 while(restofcontent != None):
-                    found = re.search(row[0], restofcontent)    # <re.Match object; span=(374, 377), match='는….'>
+                    # <re.Match object; span=(374, 377), match='는….'>
+                    found = re.search(row[0], restofcontent)
                     if found:
                         print("found: ", found)
                         foundtext = restofcontent[found.span()[0]: found.span()[1]]
-                        foundtextb = restofcontent[max(0,found.span()[0]-5): min(len(restofcontent),found.span()[0])]
-                        foundtexta = restofcontent[max(0,found.span()[1]): min(len(restofcontent),found.span()[1]+5)]
+                        foundtextb = restofcontent[max(0,found.span()[0]-5): min(len(restofcontent),
+                            found.span()[0])]
+                        foundtexta = restofcontent[max(0,found.span()[1]): min(len(restofcontent),
+                            found.span()[1]+5)]
                         changedtext = re.sub(row[0], row[1], foundtext)
-                        matches.append( (filename, re.sub('\n', '↵','…'+foundtextb+foundtext+foundtexta+'…'), re.sub('\n', '↵', '…'+foundtextb+changedtext+foundtexta+'…')) )
+                        matches.append( (filename,
+                            re.sub('\n', '↵', '…'+foundtextb+foundtext+foundtexta+'…'),
+                            re.sub('\n', '↵', '…'+foundtextb+changedtext+foundtexta+'…')) )
                         restofcontent = restofcontent[found.span()[1]:]
                     else:
                         print("found no more ", row[0])
@@ -95,7 +101,7 @@ def Search(dirname: str):
     return filelist
 
 class TreeBrowser(Frame):
-    def __init__(self, master, columnslist: list, datalist: list) -> None:
+    def __init__(self, master: Frame, columnslist: list, datalist: list) -> None:
         super().__init__(master)
         self.tree = DataTreeview(self, columnslist, datalist)
         verscrollbar = Scrollbar(self, orient ='vertical', command = self.tree.yview)
@@ -110,7 +116,8 @@ class TreeBrowser(Frame):
 
 
 class DataTreeview(Treeview):
-    def __init__(self, master, columnslist: 'list[str]', datalist: 'list'):      # datalist is a list of rowlists
+    # datalist is a list of rowlists
+    def __init__(self, master, columnslist: 'list[str]', datalist: 'list'):
         super().__init__(master)
         self.data = datalist
         self['columns'] = columnslist
@@ -156,6 +163,9 @@ rootwindow.rowconfigure(3,weight = 0)   # bottom frame
 rootwindow.columnconfigure(0,weight = 0)
 rootwindow.columnconfigure(1,weight = 2)
 
+# frame1 (csv file view)
+# frame2 (file browser for *.txt files)
+# frame3 (preview changes, run)
 frametitle = Frame(master = rootwindow, relief = 'solid')
 frame1 = Frame(master = rootwindow)
 frame2 = Frame(master = rootwindow)
@@ -199,7 +209,7 @@ btn_openSheet = Button(
 tv_keywords = TreeBrowser(frame1, ('RegEx1', 'RegEx2', 'Comment'), REGEXDATA)
 btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
-tv_keywords.grid(row =  1, column = 0, columnspan= 2, padx = 10, pady = 5, sticky = NSEW)
+tv_keywords.grid(row =  1, column = 0, columnspan = 2, padx = 10, pady = 5, sticky = NSEW)
 
 # frame2 (file browser for *.txt files)
 tv_files = TreeBrowser(frame2, ('Path', 'Filename'), Search(CONTENT_LOC))
