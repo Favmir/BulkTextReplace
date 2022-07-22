@@ -124,7 +124,7 @@ class DataTreeview(Treeview):
         self.column('#0', width=0, stretch=NO)
         self.heading('#0', text='', anchor=CENTER)
         for colname in columnslist:
-            self.column(colname, anchor = CENTER, stretch = True)
+            self.column(colname, anchor = CENTER, stretch =NO)
             self.heading(colname, text = colname, anchor=CENTER)  
         self.Update(self.data)
     
@@ -219,8 +219,8 @@ btn_files = Button(
     command = lambda: tv_files.Update(Search(CONTENT_LOC))
 )
 tv_files.grid(row =  0, column = 0, padx = 10, pady = 5, sticky = EW)
-tv_files.tree.column(0, anchor=W)
-tv_files.tree.column(1, anchor=E, width = 50)
+tv_files.tree.column(0, anchor=W, width=400)
+tv_files.tree.column(1, anchor=E)
 btn_files.grid(row =  1, column = 0, padx = 10, pady = 5)
 
 
