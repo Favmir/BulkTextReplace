@@ -4,38 +4,38 @@
 ([0-9])-([0-9])		\1–\2	Hyphen to En dash(connecting two numbers)
 ([^\s])(  )([^\s])		\1 \3	Double space typo fix
 <<([^s])		《\1			Title for Korean literature
-(^s)>>			\1》			Title for Korean literature
- -->		 	 → 			Arrow
- <--- 	 		← 			Arrow
-꺠			깨			ㅒ자 없애기
-꺤			깬			
-꺴			깼			
-꺰			깸			
-꺵			깽			
-꺨			깰			
-떄			때			ㅒ자 없애기
-떔			땜			
-떈			땐			
-떙			땡			
-떌			땔			
-뺴			빼			ㅒ자 없애기
-뺵			빽			
-뻈			뺐			
-뻄			뺌			
-뺸			뺀			
-뺼			뺄			
-썌			쌔			ㅒ자 없애기
-썍			쌕			
-쨰			째			ㅒ자 없애기
-쩁			쨉			
-쨱			짹			
-쩄			쨌			
-쩀			쨈			
-쨴			짼			
-쩅			쨍			
-쨸			쨀			
-곘			겠			이중모음이중받침
-꼐			께			
-꺠			깨			
-\n(?!—{25})(—{5,})\n		\n—————————————————————————\n	구분선
-\n(?!={29})(={5,})\n		\n=============================\n			구분선
+(^s)>>		\1》			Title for Korean literature
+ =>		 	 → 			Arrow
+ <= 	 		← 			Arrow
+꺠			깨			Korean Typo
+꺤			깬			Korean Typo
+꺴			깼			Korean Typo
+꺰			깸			Korean Typo
+꺵			깽			Korean Typo
+꺨			깰			Korean Typo
+떄			때			Korean Typo
+떔			땜			Korean Typo
+떈			땐			Korean Typo
+떙			땡			Korean Typo
+떌			땔			Korean Typo
+뺴			빼			Korean Typo
+뺵			빽			Korean Typo
+뻈			뺐			Korean Typo
+뻄			뺌			Korean Typo
+뺸			뺀			Korean Typo
+뺼			뺄			Korean Typo
+썌			쌔			Korean Typo
+썍			쌕			Korean Typo
+쨰			째			Korean Typo
+쩁			쨉			Korean Typo
+쨱			짹			Korean Typo
+쩄			쨌			Korean Typo
+쩀			쨈			Korean Typo
+쨴			짼			Korean Typo
+쩅			쨍			Korean Typo
+쨸			쨀			Korean Typo
+곘			겠			Korean Typo
+꼐			께			Korean Typo
+꺠			깨			Korean Typo
+\n(?!—{25})(—{5,})\n	\n—————————————————————————\n	Section break
+\n(?!={29})(={5,})\n	\n=============================\n			Section break
