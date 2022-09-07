@@ -14,6 +14,7 @@ from tkinter.ttk import *
 import os
 import csv
 import sys
+from io import StringIO
 
 # os.getcwd() gives you current working directory
 # os.path.dirname(os.path.abspath(__file__)) gives you location of python script
@@ -23,7 +24,7 @@ WORKBOOK_LOC = os.path.dirname(os.path.abspath(__file__))
 WORKBOOK_PATH =  os.path.join(WORKBOOK_LOC, WORKBOOK_FILENAME)
 REGEXDATA = []
 
-# obsolete dialect: delimiter=',', quotechar = '\x07', quoting = csv.QUOTE_NONE
+# dialect: delimiter='\t', quotechar = '\x07', quoting = csv.QUOTE_NONE
 
 def CreateSheet():
     if(os.path.exists(WORKBOOK_PATH)):
@@ -31,7 +32,7 @@ def CreateSheet():
         pass
     else:
         f = open(WORKBOOK_PATH, 'w', newline = '', encoding='utf-8-sig')
-        writer = csv.writer(f)
+        writer = csv.writer(f, delimiter='\t', quoting = csv.QUOTE_NONE)
         writer.writerow(('hell', 'heck','hell will be replaced with heck(not capitalized)'))
         writer.writerow(('([hH])ell', '\\1eck','using RegEx to turn \'hell\' into \'heck\', and \'Hell\' into \'Heck\''))
         f.close
@@ -139,10 +140,14 @@ class DataTreeview(Treeview):
 def LoadSheet():
     global REGEXDATA
     with open(WORKBOOK_PATH, newline = '', encoding = 'utf-8-sig') as f:
-        csvReader = csv.reader(f, dialect = 'excel')
+        newList = list()
+        for line in f:
+            newList.append(re.sub('[\t]+','\t',line))
+        #print(newList)
+        csvReader = csv.reader(newList, delimiter='\t', quoting=csv.QUOTE_NONE)
         REGEXDATA = list(csvReader)
         print('Loaded workbook: ',REGEXDATA)
-        return REGEXDATA
+    return REGEXDATA
 
 ################ Program Start ################
 
@@ -196,6 +201,7 @@ lbl_title = Label(
 lbl_title.pack()
 
 # frame1 (csv file view)
+tv_keywords = TreeBrowser(frame1, ('RegEx1', 'RegEx2', 'Comment'), REGEXDATA)
 btn_createSheet = Button(
     master = frame1,
     text = 'Create Example ' + WORKBOOK_FILENAME,
@@ -206,10 +212,15 @@ btn_openSheet = Button(
     text = 'Open RegEx Sheet',
     command = OpenSheet
 )
-tv_keywords = TreeBrowser(frame1, ('RegEx1', 'RegEx2', 'Comment'), REGEXDATA)
+btn_reloadSheet = Button(
+    master = frame1,
+    text = 'Reload RegEx Sheet',
+    command = lambda: LoadSheet and tv_keywords.Update(REGEXDATA)
+)
 btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
-tv_keywords.grid(row =  1, column = 0, columnspan = 2, padx = 10, pady = 5, sticky = NSEW)
+#btn_reloadSheet.grid(row = 0, column = 2, pady = 5)
+tv_keywords.grid(row =  1, column = 0, columnspan = 3, padx = 10, pady = 5, sticky = NSEW)
 
 # frame2 (file browser for *.txt files)
 tv_files = TreeBrowser(frame2, ('Path', 'Filename'), Search(CONTENT_LOC))

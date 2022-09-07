@@ -1,41 +1,41 @@
-﻿([^…])…([^…]),\1……\2,Double the length of Ellipsis
-"([^\s""—])(—[\s])",\1 \2,Put space at front of Em dash if it's followed by a space
-(\s)-(\s),\1—\2,Hyphen to Em dash
-([0-9])-([0-9]),\1–\2,Hyphen to En dash(connecting two numbers)
-([^\s])(  )([^\s]),\1 \3,Double space typo fix
-≪,《,Title for Korean literature
-≫,》,Title for Korean literature
- -> , → ,Arrow
- <- , ← ,Arrow
-꺠,깨,ㅒ자 없애기
-꺤,깬,
-꺴,깼,
-꺰,깸,
-꺵,깽,
-꺨,깰,
-떄,때,ㅒ자 없애기
-떔,땜,
-떈,땐,
-떙,땡,
-떌,땔,
-뺴,빼,ㅒ자 없애기
-뺵,빽,
-뻈,뺐,
-뻄,뺌,
-뺸,뺀,
-뺼,뺄,
-썌,쌔,ㅒ자 없애기
-썍,쌕,
-쨰,째,ㅒ자 없애기
-쩁,쨉,
-쨱,짹,
-쩄,쨌,
-쩀,쨈,
-쨴,짼,
-쩅,쨍,
-쨸,쨀,
-곘,겠,이중모음이중받침
-꼐,께,
-꺠,깨,
-——[—]+——,—————————————————————————,구분선 길이 표준화 (딱 맞는 길이면 동일 문자로 치환)
-==[=]+==,=============================,구분선 길이 표준화
+﻿([^…])…([^…])		\1……\2	Double the length of Ellipsis
+([^\s""'—])(—[\s])	\1 \2	Put space at front of Em dash if it's followed by a space
+(\s)-(\s)			\1—\2	Hyphen to Em dash
+([0-9])-([0-9])		\1–\2	Hyphen to En dash(connecting two numbers)
+([^\s])(  )([^\s])		\1 \3	Double space typo fix
+<<([^s])		《\1			Title for Korean literature
+(^s)>>			\1》			Title for Korean literature
+ -->		 	 → 			Arrow
+ <--- 	 		← 			Arrow
+꺠			깨			ㅒ자 없애기
+꺤			깬			
+꺴			깼			
+꺰			깸			
+꺵			깽			
+꺨			깰			
+떄			때			ㅒ자 없애기
+떔			땜			
+떈			땐			
+떙			땡			
+떌			땔			
+뺴			빼			ㅒ자 없애기
+뺵			빽			
+뻈			뺐			
+뻄			뺌			
+뺸			뺀			
+뺼			뺄			
+썌			쌔			ㅒ자 없애기
+썍			쌕			
+쨰			째			ㅒ자 없애기
+쩁			쨉			
+쨱			짹			
+쩄			쨌			
+쩀			쨈			
+쨴			짼			
+쩅			쨍			
+쨸			쨀			
+곘			겠			이중모음이중받침
+꼐			께			
+꺠			깨			
+\n(?!—{25})(—{5,})\n		\n—————————————————————————\n	구분선
+\n(?!={29})(={5,})\n		\n=============================\n			구분선
