@@ -42,9 +42,9 @@ def OpenSheet():
 
 def ReplaceText(wordlist: 'list[list[str]]'):
     files = ''
-    for filename in glob.glob('*.txt'):
+    for (path,filename) in SearchSub(CONTENT_LOC):
         files = files + ', ' + filename
-        with open(os.path.join(CONTENT_LOC, filename), 'r+', encoding = 'utf-8') as f:
+        with open(os.path.join(path, filename), 'r+', encoding = 'utf-8') as f:
             content = f.read()
             for numrow, row in enumerate(wordlist, start = 1):
                 content = re.sub(row[0], row[1], content)
@@ -55,11 +55,10 @@ def ReplaceText(wordlist: 'list[list[str]]'):
     print('Replaced texts in files: ', files)
 
 def PreviewReplaceText(wordlist: 'list[list[str]]') -> 'list[list[str]]':
-    files = ''
     matches = []
-    for filename in glob.glob('*.txt'):
-        files = files + ', ' + filename
-        with open(os.path.join(CONTENT_LOC, filename), 'r', encoding = 'utf-8') as f:
+    
+    for (path,filename) in SearchSub(CONTENT_LOC):
+        with open(os.path.join(path, filename), 'r', encoding = 'utf-8') as f:
             content = f.read()
             for row in wordlist:
                 restofcontent = content
@@ -90,15 +89,25 @@ def GetFileNames(mypath: str):
     filenames = glob.glob(mypath + '\*.txt')
     return filenames
 
+'''def return list of file paths for all text files in a folder, including subfolders'''
+
 # returns list of (dirname, filname) for all .txt files in dirname
 def Search(dirname: str):
     filelist = []
-    filenames = os.listdir(dirname)
-    for filename in filenames:
+    for filename in os.listdir(dirname):
         # full_filename = os.path.join(dirname, filename)
         ext = os.path.splitext(filename)[-1]
         if ext == '.txt': 
             filelist.append((dirname,filename))
+    return filelist
+def SearchSub(path: str):
+    filelist = []
+    for (path,dir,filenames) in os.walk(path):
+        # full_filename = os.path.join(os.path.join(path, dir), filename)
+        for filename in filenames:
+            ext = os.path.splitext(filename)[-1]
+            if ext == '.txt': 
+                filelist.append((path,filename))
     return filelist
 
 class TreeBrowser(Frame):
@@ -142,11 +151,19 @@ def LoadSheet():
     with open(WORKBOOK_PATH, newline = '', encoding = 'utf-8-sig') as f:
         newList = list()
         for line in f:
-            newList.append(re.sub('[\t]+','\t',line))
-        #print(newList)
+            if (line == '\r\n' or line == '\n'):
+                continue
+            else:
+                line = re.sub('[\t]+', '\t', line)
+                if (line == '\t\r\n' or line == '\t\n'):
+                    continue
+                newList.append(line)
+        print('Loaded workbook: ')
+        for change in newList:
+            print(change)
         csvReader = csv.reader(newList, delimiter='\t', quoting=csv.QUOTE_NONE)
         REGEXDATA = list(csvReader)
-        print('Loaded workbook: ',REGEXDATA)
+        #print('Loaded workbook: ',REGEXDATA)
     return REGEXDATA
 
 ################ Program Start ################
@@ -219,15 +236,15 @@ btn_reloadSheet = Button(
 )
 btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
-#btn_reloadSheet.grid(row = 0, column = 2, pady = 5)
+btn_reloadSheet.grid(row = 0, column = 2, pady = 5)
 tv_keywords.grid(row =  1, column = 0, columnspan = 3, padx = 10, pady = 5, sticky = NSEW)
 
 # frame2 (file browser for *.txt files)
-tv_files = TreeBrowser(frame2, ('Path', 'Filename'), Search(CONTENT_LOC))
+tv_files = TreeBrowser(frame2, ('Path', 'Filename'), SearchSub(CONTENT_LOC))
 btn_files = Button(
     master = frame2,
     text = 'Refresh File List',
-    command = lambda: tv_files.Update(Search(CONTENT_LOC))
+    command = lambda: tv_files.Update(SearchSub(CONTENT_LOC))
 )
 tv_files.grid(row =  0, column = 0, padx = 10, pady = 5, sticky = EW)
 tv_files.tree.column(0, anchor=W, width=400)
