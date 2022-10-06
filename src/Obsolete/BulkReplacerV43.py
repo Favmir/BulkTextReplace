@@ -1,22 +1,20 @@
 ######|| BulkReplacer Program ||######
 # Replaces text across multiple files via RegEx
-# Version 5(2022/10/06)
+# Version 4.3(2021/12/26)
 # Author: FavmirY@gmail.com
-# CSV Sheet file uses '\t' as delimiter. You can use multiple tabs to separate columns.
-# don't put empty lines in CSV file.
+# CSV Sheet file must be '`utf-8-sig' with ',' as delimiter
+# (This was chosen because it's how excel processes .csv data)
+# (Excel cannot read contents of a csv file if formatted in 'utf-8')
 # .txt files getting replaced should be 'utf-8'
-# always use \n for regex newline, not \r\n.
 
 import re
 import glob
 from tkinter import *
 from tkinter.ttk import *
-import tkinter.font
 import os
 import csv
 import sys
 from io import StringIO
-
 
 # os.getcwd() gives you current working directory
 # os.path.dirname(os.path.abspath(__file__)) gives you location of python script
@@ -44,9 +42,9 @@ def OpenSheet():
 
 def ReplaceText(wordlist: 'list[list[str]]'):
     files = ''
-    for filename in glob.glob('*.txt'):
+    for (path,filename) in SearchSub(CONTENT_LOC):
         files = files + ', ' + filename
-        with open(os.path.join(CONTENT_LOC, filename), 'r+', encoding = 'utf-8') as f:
+        with open(os.path.join(path, filename), 'r+', encoding = 'utf-8') as f:
             content = f.read()
             for numrow, row in enumerate(wordlist, start = 1):
                 content = re.sub(row[0], row[1], content)
@@ -56,55 +54,11 @@ def ReplaceText(wordlist: 'list[list[str]]'):
             f.close()
     print('Replaced texts in files: ', files)
 
-def ReplaceSpecialChars(word: str) -> str:
-	replaceList =[	['\t','␉'],
-                    ['\n','␤'],
-				'''	['','␀'],
-					['','␁'],
-					['','␂'],
-					['','␃'],
-					['','␄'],
-					['','␅'],
-					['','␆'],
-					['','␇'],
-					['','␈'],
-					['\n','␊'], # python uses universal newline to reduce OS dependency
-					['','␋'],
-					['','␌'],
-					['\r','␍'], # python automatically converts \r\n to \n when reading file so this does nothing
-					['','␎'],
-					['','␏'],
-					['','␐'],
-					['','␑'],
-					['','␒'],
-					['','␓'],
-					['','␔'],
-					['','␕'],
-					['','␖'],
-					['','␗'],
-					['','␘'],
-					['','␙'],
-					['','␚'],
-					['','␛'],
-					['','␜'],
-					['','␝'],
-					['','␞'],
-					['','␟'],
-					['','␠'],
-					['','␡'],
-					['','␣'],
-					['','␤'],'''
-					]
-	for numrow, row in enumerate(replaceList, start = 1):
-		word = re.sub(row[0], row[1], word)
-	return word
-
 def PreviewReplaceText(wordlist: 'list[list[str]]') -> 'list[list[str]]':
-    files = ''
     matches = []
-    for filename in glob.glob('*.txt'):
-        files = files + ', ' + filename
-        with open(os.path.join(CONTENT_LOC, filename), 'r', encoding = 'utf-8') as f:
+    
+    for (path,filename) in SearchSub(CONTENT_LOC):
+        with open(os.path.join(path, filename), 'r', encoding = 'utf-8') as f:
             content = f.read()
             for row in wordlist:
                 restofcontent = content
@@ -119,7 +73,9 @@ def PreviewReplaceText(wordlist: 'list[list[str]]') -> 'list[list[str]]':
                         foundtexta = restofcontent[max(0,found.span()[1]): min(len(restofcontent),
                             found.span()[1]+5)]
                         changedtext = re.sub(row[0], row[1], foundtext)
-                        matches.append( (filename, ReplaceSpecialChars('…'+foundtextb+foundtext+foundtexta+'…'), ReplaceSpecialChars('…'+foundtextb+changedtext+foundtexta+'…')) )
+                        matches.append( (filename,
+                            re.sub('\n', '↵', '…'+foundtextb+foundtext+foundtexta+'…'),
+                            re.sub('\n', '↵', '…'+foundtextb+changedtext+foundtexta+'…')) )
                         restofcontent = restofcontent[found.span()[1]:]
                     else:
                         print("found no more ", row[0])
@@ -133,15 +89,25 @@ def GetFileNames(mypath: str):
     filenames = glob.glob(mypath + '\*.txt')
     return filenames
 
+'''def return list of file paths for all text files in a folder, including subfolders'''
+
 # returns list of (dirname, filname) for all .txt files in dirname
 def Search(dirname: str):
     filelist = []
-    filenames = os.listdir(dirname)
-    for filename in filenames:
+    for filename in os.listdir(dirname):
         # full_filename = os.path.join(dirname, filename)
         ext = os.path.splitext(filename)[-1]
         if ext == '.txt': 
             filelist.append((dirname,filename))
+    return filelist
+def SearchSub(path: str):
+    filelist = []
+    for (path,dir,filenames) in os.walk(path):
+        # full_filename = os.path.join(os.path.join(path, dir), filename)
+        for filename in filenames:
+            ext = os.path.splitext(filename)[-1]
+            if ext == '.txt': 
+                filelist.append((path,filename))
     return filelist
 
 class TreeBrowser(Frame):
@@ -164,7 +130,6 @@ class DataTreeview(Treeview):
     def __init__(self, master, columnslist: 'list[str]', datalist: 'list'):
         super().__init__(master)
         self.data = datalist
-        self.configure(height=10)   # number of minimum rows to show per tree
         self['columns'] = columnslist
         self.column('#0', width=0, stretch=NO)
         self.heading('#0', text='', anchor=CENTER)
@@ -186,11 +151,19 @@ def LoadSheet():
     with open(WORKBOOK_PATH, newline = '', encoding = 'utf-8-sig') as f:
         newList = list()
         for line in f:
-            newList.append(re.sub('[\t]+','\t',line))
-        #print(newList)
+            if (line == '\r\n' or line == '\n'):
+                continue
+            else:
+                line = re.sub('[\t]+', '\t', line)
+                if (line == '\t\r\n' or line == '\t\n'):
+                    continue
+                newList.append(line)
+        print('Loaded workbook: ')
+        for change in newList:
+            print(change)
         csvReader = csv.reader(newList, delimiter='\t', quoting=csv.QUOTE_NONE)
         REGEXDATA = list(csvReader)
-        print('Loaded workbook: ',REGEXDATA)
+        #print('Loaded workbook: ',REGEXDATA)
     return REGEXDATA
 
 ################ Program Start ################
@@ -204,8 +177,6 @@ if __debug__:
 # Gui
 rootwindow = Tk()
 rootwindow.title('Bulk Replacer')
-default_font = tkinter.font.nametofont("TkDefaultFont")
-default_font.config(family='Noto Sans KR', size = 12)
 rootwindow['bg'] = 'grey'
 rootwindow.rowconfigure(0,weight = 0)   # title frame
 rootwindow.rowconfigure(1,weight = 3)
@@ -265,15 +236,15 @@ btn_reloadSheet = Button(
 )
 btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
-#btn_reloadSheet.grid(row = 0, column = 2, pady = 5)
+btn_reloadSheet.grid(row = 0, column = 2, pady = 5)
 tv_keywords.grid(row =  1, column = 0, columnspan = 3, padx = 10, pady = 5, sticky = NSEW)
 
 # frame2 (file browser for *.txt files)
-tv_files = TreeBrowser(frame2, ('Path', 'Filename'), Search(CONTENT_LOC))
+tv_files = TreeBrowser(frame2, ('Path', 'Filename'), SearchSub(CONTENT_LOC))
 btn_files = Button(
     master = frame2,
     text = 'Refresh File List',
-    command = lambda: tv_files.Update(Search(CONTENT_LOC))
+    command = lambda: tv_files.Update(SearchSub(CONTENT_LOC))
 )
 tv_files.grid(row =  0, column = 0, padx = 10, pady = 5, sticky = EW)
 tv_files.tree.column(0, anchor=W, width=400)
