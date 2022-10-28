@@ -20,13 +20,52 @@ from io import StringIO
 
 # os.getcwd() gives you current working directory
 # os.path.dirname(os.path.abspath(__file__)) gives you location of python script
-CONTENT_LOC = os.path.dirname(os.path.abspath(__file__))
+# __file__ doesn't work when you run python script from IDLE
+if __debug__:
+    CONTENT_LOC = os.path.dirname('D:\\Users\\Favmir\\Documents\\GitHub\\BulkTextReplace\\src\\BulkReplacer.py')
+    WORKBOOK_LOC = os.path.dirname('D:\\Users\\Favmir\\Documents\\GitHub\\BulkTextReplace\\src\\BulkReplacer.py')
+else:
+    CONTENT_LOC = os.path.dirname(os.path.abspath(__file__))
+    WORKBOOK_LOC = os.path.dirname(os.path.abspath(__file__))
 WORKBOOK_FILENAME = 'BulkReplacer_List.csv'
-WORKBOOK_LOC = os.path.dirname(os.path.abspath(__file__))
 WORKBOOK_PATH =  os.path.join(WORKBOOK_LOC, WORKBOOK_FILENAME)
 REGEXDATA = []
+EXTENSION = 'txt'
 
 # dialect: delimiter='\t', quotechar = '\x07', quoting = csv.QUOTE_NONE
+
+def GetFilesFull():
+    list = glob.glob('*.' + EXTENSION)
+    for filename in list:
+        filename = os.path.join(CONTENT_LOC, filename)
+    return list
+
+def GetFilesSeparate() -> list[list[str]]:
+    list = glob.glob('*.' + EXTENSION)
+    filelist = []
+    for filename in list:
+        filelist.append([CONTENT_LOC, filename])
+        print(filelist)
+    return filelist
+
+# returns list of full path for all .EXTENSION files in current folder
+def GetFileNames(mypath: str):
+    # filenames = next(walk(mypath), (None, None, []))[2]  # [] if no file
+    filenames = glob.glob(mypath + '\*.'+EXTENSION)
+    return filenames
+
+# returns list of (dirname, filname) for all .EXTENSION files in dirname
+def GetPathAndName():
+    global EXTENSION
+    filelist = []
+    filenames = os.listdir(CONTENT_LOC)
+    for filename in filenames:
+        # full_filename = os.path.join(dirname, filename)
+        ext = os.path.splitext(filename)[-1]
+        if ext == '.'+EXTENSION:
+            filelist.append((CONTENT_LOC,filename))
+            print(filelist)
+    return filelist
 
 def CreateSheet():
     if(os.path.exists(WORKBOOK_PATH)):
@@ -44,7 +83,7 @@ def OpenSheet():
 
 def ReplaceText(wordlist: 'list[list[str]]'):
     files = ''
-    for filename in glob.glob('*.txt'):
+    for filename in GetFilesFull():
         files = files + ', ' + filename
         with open(os.path.join(CONTENT_LOC, filename), 'r+', encoding = 'utf-8') as f:
             content = f.read()
@@ -55,56 +94,24 @@ def ReplaceText(wordlist: 'list[list[str]]'):
             f.truncate()
             f.close()
     print('Replaced texts in files: ', files)
-
+    
 def ReplaceSpecialChars(word: str) -> str:
-	replaceList =[	['\t','␉'],
-                    ['\n','␤'],
-				'''	['','␀'],
-					['','␁'],
-					['','␂'],
-					['','␃'],
-					['','␄'],
-					['','␅'],
-					['','␆'],
-					['','␇'],
-					['','␈'],
-					['\n','␊'], # python uses universal newline to reduce OS dependency
-					['','␋'],
-					['','␌'],
-					['\r','␍'], # python automatically converts \r\n to \n when reading file so this does nothing
-					['','␎'],
-					['','␏'],
-					['','␐'],
-					['','␑'],
-					['','␒'],
-					['','␓'],
-					['','␔'],
-					['','␕'],
-					['','␖'],
-					['','␗'],
-					['','␘'],
-					['','␙'],
-					['','␚'],
-					['','␛'],
-					['','␜'],
-					['','␝'],
-					['','␞'],
-					['','␟'],
-					['','␠'],
-					['','␡'],
-					['','␣'],
-					['','␤'],'''
-					]
-	for numrow, row in enumerate(replaceList, start = 1):
-		word = re.sub(row[0], row[1], word)
-	return word
+    replaceList = [
+        ['\t','␉'],
+        ['\n','␤'],
+        [' ',' ␣ ']
+        ]
+    for row in replaceList:
+        word = re.sub(row[0], row[1], word)
+    return word
 
-def PreviewReplaceText(wordlist: 'list[list[str]]') -> 'list[list[str]]':
+def PreviewReplaceText(wordlist: list[list[str]]) -> list[list[str]]:
     files = ''
     matches = []
-    for filename in glob.glob('*.txt'):
+    for filename in GetFilesFull():
+        print('Previewing file: ', filename)
         files = files + ', ' + filename
-        with open(os.path.join(CONTENT_LOC, filename), 'r', encoding = 'utf-8') as f:
+        with open(filename, 'r', encoding = 'utf-8') as f:
             content = f.read()
             for row in wordlist:
                 restofcontent = content
@@ -119,30 +126,13 @@ def PreviewReplaceText(wordlist: 'list[list[str]]') -> 'list[list[str]]':
                         foundtexta = restofcontent[max(0,found.span()[1]): min(len(restofcontent),
                             found.span()[1]+5)]
                         changedtext = re.sub(row[0], row[1], foundtext)
-                        matches.append( (filename, ReplaceSpecialChars('…'+foundtextb+foundtext+foundtexta+'…'), ReplaceSpecialChars('…'+foundtextb+changedtext+foundtexta+'…')) )
+                        matches.append( (filename, ReplaceSpecialChars('…'+foundtextb+foundtext+foundtexta+'…'), ReplaceSpecialChars('…'+foundtextb+changedtext+foundtexta+'…'), row[2]) )
                         restofcontent = restofcontent[found.span()[1]:]
                     else:
                         print("found no more ", row[0])
                         restofcontent = None
             f.close()
     return matches
-
-# returns list of full path for all .txt files in current folder
-def GetFileNames(mypath: str):
-    # filenames = next(walk(mypath), (None, None, []))[2]  # [] if no file
-    filenames = glob.glob(mypath + '\*.txt')
-    return filenames
-
-# returns list of (dirname, filname) for all .txt files in dirname
-def Search(dirname: str):
-    filelist = []
-    filenames = os.listdir(dirname)
-    for filename in filenames:
-        # full_filename = os.path.join(dirname, filename)
-        ext = os.path.splitext(filename)[-1]
-        if ext == '.txt': 
-            filelist.append((dirname,filename))
-    return filelist
 
 class TreeBrowser(Frame):
     def __init__(self, master: Frame, columnslist: list, datalist: list) -> None:
@@ -184,28 +174,33 @@ class DataTreeview(Treeview):
 def LoadSheet():
     global REGEXDATA
     with open(WORKBOOK_PATH, newline = '', encoding = 'utf-8-sig') as f:
-        newList = list()
+        regList = list()
         for line in f:
-            newList.append(re.sub('[\t]+','\t',line))
+            line = re.sub('[\t]+','\t',line)
+            #insert third column when there's only two columns
+            line = re.sub('^([^\t]+)\t([^\r\n\t]+)([\r\n]+)$', '\\1\t\\2\t\\3', line)
+            regList.append(line)
         #print(newList)
-        csvReader = csv.reader(newList, delimiter='\t', quoting=csv.QUOTE_NONE)
+        csvReader = csv.reader(regList, delimiter='\t', quoting=csv.QUOTE_NONE)
         REGEXDATA = list(csvReader)
         print('Loaded workbook: ',REGEXDATA)
     return REGEXDATA
 
+def UpdateExt():
+    global EXTENSION
+    EXTENSION = ext_input.get()
+    print('Updated extension: ', EXTENSION)
+    
 ################ Program Start ################
 
 CreateSheet()
 LoadSheet()
 
-if __debug__:
-    print(GetFileNames(WORKBOOK_LOC))
-
 # Gui
 rootwindow = Tk()
 rootwindow.title('Bulk Replacer')
 default_font = tkinter.font.nametofont("TkDefaultFont")
-default_font.config(family='Noto Sans KR', size = 12)
+default_font.config(family= 'Noto Sans', size = 15)
 rootwindow['bg'] = 'grey'
 rootwindow.rowconfigure(0,weight = 0)   # title frame
 rootwindow.rowconfigure(1,weight = 3)
@@ -215,7 +210,7 @@ rootwindow.columnconfigure(0,weight = 0)
 rootwindow.columnconfigure(1,weight = 2)
 
 # frame1 (csv file view)
-# frame2 (file browser for *.txt files)
+# frame2 (file browser for *.EXTENSION files)
 # frame3 (preview changes, run)
 frametitle = Frame(master = rootwindow, relief = 'solid')
 frame1 = Frame(master = rootwindow)
@@ -242,7 +237,7 @@ frame3.columnconfigure(1,weight = 0)
 lbl_title = Label(
     master = frametitle,
     text = 'RegEx Bulk Replacer',
-    font = ("Verdana", 16, "bold"),
+    font = ("Verdana", 20, "bold"),
     background = 'grey')
 lbl_title.pack()
 
@@ -250,7 +245,7 @@ lbl_title.pack()
 tv_keywords = TreeBrowser(frame1, ('RegEx1', 'RegEx2', 'Comment'), REGEXDATA)
 btn_createSheet = Button(
     master = frame1,
-    text = 'Create Example ' + WORKBOOK_FILENAME,
+    text = 'Create ' + WORKBOOK_FILENAME,
     command = CreateSheet
 )
 btn_openSheet = Button(
@@ -261,31 +256,42 @@ btn_openSheet = Button(
 btn_reloadSheet = Button(
     master = frame1,
     text = 'Reload RegEx Sheet',
-    command = lambda: LoadSheet and tv_keywords.Update(REGEXDATA)
+    command = lambda: LoadSheet() and tv_keywords.Update(REGEXDATA)
 )
 btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
-#btn_reloadSheet.grid(row = 0, column = 2, pady = 5)
+btn_reloadSheet.grid(row = 0, column = 2, pady = 5)
 tv_keywords.grid(row =  1, column = 0, columnspan = 3, padx = 10, pady = 5, sticky = NSEW)
 
-# frame2 (file browser for *.txt files)
-tv_files = TreeBrowser(frame2, ('Path', 'Filename'), Search(CONTENT_LOC))
+# frame2 (file browser for *.EXTENSION files)
+def character_limit(entry_text):
+    if len(entry_text.get()) > 4:
+        entry_text.set(entry_text.get()[:5])
+tv_files = TreeBrowser(frame2, ('Path', 'Filename'), GetPathAndName())
+ext_desc = Label(frame2, text = 'Input File Extension:')
+entry_text = StringVar()
+ext_input = Entry(frame2, width = 10, textvariable=entry_text)
+ext_input.insert(END, 'txt')
 btn_files = Button(
     master = frame2,
     text = 'Refresh File List',
-    command = lambda: tv_files.Update(Search(CONTENT_LOC))
+    command = lambda: UpdateExt() and tv_files.Update(GetPathAndName())
 )
-tv_files.grid(row =  0, column = 0, padx = 10, pady = 5, sticky = EW)
+tv_files.grid(row =  0, column = 0, columnspan=3, padx = 10, pady = 5, sticky = EW)
 tv_files.tree.column(0, anchor=W, width=400)
 tv_files.tree.column(1, anchor=E)
-btn_files.grid(row =  1, column = 0, padx = 10, pady = 5)
+
+ext_desc.grid(row = 1, column = 0, sticky = E)
+ext_input.grid(row =  1, column = 1, padx = 10, pady = 5)
+entry_text.trace("w", lambda *args: character_limit(entry_text))
+btn_files.grid(row =  1, column = 2, padx = 10, pady = 5)
 
 
 # frame3 (preview changes, run)
 lbl_preview = Label(
     master = frame3,
     text = 'What will be changed:')
-tv_preview = TreeBrowser(frame3, ('Filename', 'Before', 'After'), PreviewReplaceText(REGEXDATA))
+tv_preview = TreeBrowser(frame3, ('Filename', 'Before', 'After', 'Comment'), PreviewReplaceText(REGEXDATA))
 btn_preview = Button(
     master = frame3,
     text = 'Refresh preview window',
@@ -293,8 +299,8 @@ btn_preview = Button(
 )
 btn_run = Button(
     master = frame3,
-    text = 'Replace in every *.txt files selected',
-    command = lambda: ReplaceText(REGEXDATA)
+    text = 'Replace in every files selected',
+    command = lambda: ReplaceText(REGEXDATA) and tv_preview.Update(PreviewReplaceText(REGEXDATA))
 )
 lbl_preview.grid(row = 0, column = 0, pady = 5)
 btn_preview.grid(row = 0, column = 1, padx = 5)
@@ -302,6 +308,7 @@ tv_preview.grid(row = 1, column = 0, columnspan = 2, padx = 10, pady = 5, sticky
 tv_preview.tree.column(0, width = 120, stretch=NO, anchor=W)
 tv_preview.tree.column(1, width = 250, minwidth = 150)
 tv_preview.tree.column(2, width = 250, minwidth = 150)
+tv_preview.tree.column(3, width = 200, minwidth = 100)
 btn_run.grid(row = 2, column = 0, pady = 5)
 
 
