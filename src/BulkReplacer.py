@@ -19,18 +19,18 @@ from io import StringIO
 
 
 # os.getcwd() gives you current working directory
-# os.path.dirname(os.path.abspath(__file__)) gives you location of python script
+# os.path.dirname(os.path.abspath(__file__)) gives you location of python script EX)  d:\Users\Favmir\Documents\GitHub\BulkTextReplace\src
 # __file__ doesn't work when you run python script from IDLE
-if __debug__:
-    CONTENT_LOC = os.path.dirname('D:\\Users\\Favmir\\Documents\\GitHub\\BulkTextReplace\\src\\BulkReplacer.py')
-    WORKBOOK_LOC = os.path.dirname('D:\\Users\\Favmir\\Documents\\GitHub\\BulkTextReplace\\src\\BulkReplacer.py')
-else:
-    CONTENT_LOC = os.path.dirname(os.path.abspath(__file__))
-    WORKBOOK_LOC = os.path.dirname(os.path.abspath(__file__))
+
+
+CONTENT_LOC = os.path.dirname(os.path.abspath(__file__))
+WORKBOOK_LOC = os.path.dirname(os.path.abspath(__file__))
 WORKBOOK_FILENAME = 'BulkReplacer_List.csv'
 WORKBOOK_PATH =  os.path.join(WORKBOOK_LOC, WORKBOOK_FILENAME)
 REGEXDATA = []
 EXTENSION = 'txt'
+FILELIST = []
+
 
 # dialect: delimiter='\t', quotechar = '\x07', quoting = csv.QUOTE_NONE
 
@@ -41,12 +41,14 @@ def GetFilesFull():
     return list
 
 def GetFilesSeparate() -> list[list[str]]:
-    list = glob.glob('*.' + EXTENSION)
-    filelist = []
-    for filename in list:
-        filelist.append([CONTENT_LOC, filename])
-        print(filelist)
-    return filelist
+    global FILESLIST
+    FILELIST.clear()
+    for dirpath, dnames, fnames in os.walk(CONTENT_LOC):
+        for f in fnames:
+            if f.endswith("."+EXTENSION):
+                FILELIST.append([dirpath+'\\', f])
+                #EXTENSION(os.path.join(dirpath, f))
+    return FILELIST
 
 # returns list of full path for all .EXTENSION files in current folder
 def GetFileNames(mypath: str):
@@ -190,7 +192,7 @@ def UpdateExt():
     global EXTENSION
     EXTENSION = ext_input.get()
     print('Updated extension: ', EXTENSION)
-    
+
 ################ Program Start ################
 
 CreateSheet()
@@ -253,10 +255,13 @@ btn_openSheet = Button(
     text = 'Open RegEx Sheet',
     command = OpenSheet
 )
+def refresh_sheet():
+    LoadSheet()
+    tv_keywords.Update(REGEXDATA)
 btn_reloadSheet = Button(
     master = frame1,
     text = 'Reload RegEx Sheet',
-    command = lambda: LoadSheet() and tv_keywords.Update(REGEXDATA)
+    command = refresh_sheet
 )
 btn_createSheet.grid(row = 0, column = 0, pady = 5)
 btn_openSheet.grid(row = 0, column = 1, pady = 5)
@@ -267,16 +272,20 @@ tv_keywords.grid(row =  1, column = 0, columnspan = 3, padx = 10, pady = 5, stic
 def character_limit(entry_text):
     if len(entry_text.get()) > 4:
         entry_text.set(entry_text.get()[:5])
-tv_files = TreeBrowser(frame2, ('Path', 'Filename'), GetPathAndName())
+tv_files = TreeBrowser(frame2, ('Path', 'Filename'), GetFilesSeparate())
 ext_desc = Label(frame2, text = 'Input File Extension:')
 entry_text = StringVar()
 ext_input = Entry(frame2, width = 10, textvariable=entry_text)
 ext_input.insert(END, 'txt')
+def refresh_file():
+    UpdateExt()
+    tv_files.Update(GetFilesSeparate())
 btn_files = Button(
     master = frame2,
     text = 'Refresh File List',
-    command = lambda: UpdateExt() and tv_files.Update(GetPathAndName())
+    command = refresh_file
 )
+
 tv_files.grid(row =  0, column = 0, columnspan=3, padx = 10, pady = 5, sticky = EW)
 tv_files.tree.column(0, anchor=W, width=400)
 tv_files.tree.column(1, anchor=E)
