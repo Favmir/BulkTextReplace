@@ -101,7 +101,7 @@ def ReplaceSpecialChars(word: str) -> str:
     replaceList = [
         ['\t','␉'],
         ['\n','␤'],
-        [' ',' ␣ ']
+        [' ',' ␣ ']  # also could use ⎵
         ]
     for row in replaceList:
         word = re.sub(row[0], row[1], word)
@@ -110,6 +110,7 @@ def ReplaceSpecialChars(word: str) -> str:
 def PreviewReplaceText(wordlist: list[list[str]]) -> list[list[str]]:
     files = ''
     matches = []
+    ellipsisLen = 5
     for filename in GetFilesFull():
         print('Previewing file: ', filename)
         files = files + ', ' + filename
@@ -123,16 +124,22 @@ def PreviewReplaceText(wordlist: list[list[str]]) -> list[list[str]]:
                     if found:
                         print("found: ", found)
                         foundtext = restofcontent[found.span()[0]: found.span()[1]]
-                        foundtextb = restofcontent[max(0,found.span()[0]-5): min(len(restofcontent),
+                        foundtextb = restofcontent[max(0,found.span()[0]-ellipsisLen): min(len(restofcontent),
                             found.span()[0])]
                         foundtexta = restofcontent[max(0,found.span()[1]): min(len(restofcontent),
-                            found.span()[1]+5)]
+                            found.span()[1]+ellipsisLen)]
                         changedtext = re.sub(row[0], row[1], foundtext)
                         matches.append( (filename, ReplaceSpecialChars('…'+foundtextb+foundtext+foundtexta+'…'), ReplaceSpecialChars('…'+foundtextb+changedtext+foundtexta+'…'), row[2]) )
+                        
+                        #content = restofcontent[0:found.span()[0]] + changedtext + restofcontent[found.span()[1]:] # apply change for next regex
+
                         restofcontent = restofcontent[found.span()[1]:]
+                        
                     else:
                         print("found no more ", row[0])
                         restofcontent = None
+                        content = re.sub(row[0], row[1], content) # apply change for next regex
+                        
             f.close()
     return matches
 
@@ -150,13 +157,12 @@ class TreeBrowser(Frame):
     def Update(self, datalist: 'list[list[str]]'):
         self.tree.Update(datalist)
 
-
 class DataTreeview(Treeview):
     # datalist is a list of rowlists
     def __init__(self, master, columnslist: 'list[str]', datalist: 'list'):
         super().__init__(master)
         self.data = datalist
-        self.configure(height=10)   # number of minimum rows to show per tree
+        self.configure(height=10)   # height: number of minimum rows to show per tree
         self['columns'] = columnslist
         self.column('#0', width=0, stretch=NO)
         self.heading('#0', text='', anchor=CENTER)
@@ -202,7 +208,7 @@ LoadSheet()
 rootwindow = Tk()
 rootwindow.title('Bulk Replacer')
 default_font = tkinter.font.nametofont("TkDefaultFont")
-default_font.config(family= 'Noto Sans', size = 15)
+default_font.config(family= 'Noto Sans', size = 10)
 rootwindow['bg'] = 'grey'
 rootwindow.rowconfigure(0,weight = 0)   # title frame
 rootwindow.rowconfigure(1,weight = 3)
@@ -210,6 +216,9 @@ rootwindow.rowconfigure(2,weight = 0)
 rootwindow.rowconfigure(3,weight = 0)   # bottom frame
 rootwindow.columnconfigure(0,weight = 0)
 rootwindow.columnconfigure(1,weight = 2)
+
+TreesStyle=Style()
+TreesStyle.configure("Treeview", font=('Noto Sans', 15), rowheight=30)
 
 # frame1 (csv file view)
 # frame2 (file browser for *.EXTENSION files)
