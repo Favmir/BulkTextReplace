@@ -76,9 +76,10 @@ def CreateSheet():
     else:
         f = open(WORKBOOK_PATH, 'w', newline = '', encoding='utf-8-sig')
         writer = csv.writer(f, delimiter='\t', quoting = csv.QUOTE_NONE)
-        writer.writerow(('sep=',''))
+        #writer.writerow(('sep=',''))   # this line is for excel to recognize the file as tab delimited;
         writer.writerow(('hell', 'heck','hell will be replaced with heck(not capitalized)'))
         writer.writerow(('([hH])ell', '\\1eck','using RegEx to turn \'hell\' into \'heck\', and \'Hell\' into \'Heck\''))
+        writer.writerow(('안녕하세요','Hello','Korean to English'))
         f.close
 
 def OpenSheet():
@@ -195,7 +196,7 @@ def LoadSheet():
     global REGEXDATA
     with open(WORKBOOK_PATH, newline = '', encoding = 'utf-8-sig') as f:
         regList = list()
-        next(f) #skip the first line with 'sep= '
+        #next(f) #skip the first line with 'sep= '
         for line in f:
             line = re.sub('[\t]+','\t',line)
             #insert third column when there's only two columns
