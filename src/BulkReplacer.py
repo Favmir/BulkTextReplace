@@ -246,6 +246,11 @@ frame3.rowconfigure(2,weight = 0)
 frame3.columnconfigure(0,weight = 1)
 frame3.columnconfigure(1,weight = 0)
 
+def refreshTV():
+    tv_keywords.Update(REGEXDATA)
+    tv_files.Update(GetFilesSeparate())
+    tv_preview.Update(PreviewReplaceText(REGEXDATA))
+
 # top frame
 lbl_title = Label(
     master = frametitle,
@@ -268,7 +273,7 @@ btn_openSheet = Button(
 )
 def refresh_sheet():
     LoadSheet()
-    tv_keywords.Update(REGEXDATA)
+    refreshTV()
 btn_reloadSheet = Button(
     master = frame1,
     text = 'Reload RegEx Sheet',
@@ -290,7 +295,7 @@ ext_input = Entry(frame2, width = 10, textvariable=entry_text)
 ext_input.insert(END, 'txt')
 def refresh_file():
     UpdateExt()
-    tv_files.Update(GetFilesSeparate())
+    refreshTV()
 btn_files = Button(
     master = frame2,
     text = 'Refresh File List',
@@ -315,12 +320,12 @@ tv_preview = TreeBrowser(frame3, ('Filename', 'Before', 'After', 'Comment'), Pre
 btn_preview = Button(
     master = frame3,
     text = 'Refresh preview window',
-    command = lambda: LoadSheet and tv_preview.Update(PreviewReplaceText(REGEXDATA))
+    command = lambda: LoadSheet and refreshTV()
 )
 btn_run = Button(
     master = frame3,
     text = 'Replace in every files selected',
-    command = lambda: ReplaceText(REGEXDATA) and tv_preview.Update(PreviewReplaceText(REGEXDATA))
+    command = lambda: ReplaceText(REGEXDATA) and refreshTV()
 )
 lbl_preview.grid(row = 0, column = 0, pady = 5)
 btn_preview.grid(row = 0, column = 1, padx = 5)
@@ -333,11 +338,3 @@ btn_run.grid(row = 2, column = 0, pady = 5)
 
 
 rootwindow.mainloop()
-
-
-
-
-
-
-
-
