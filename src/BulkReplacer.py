@@ -157,6 +157,17 @@ class TreeBrowser(Frame):
         self.tree.pack(expand = True, fill = 'both')
     def Update(self, datalist: 'list[list[str]]'):
         self.tree.Update(datalist)
+        
+    def on_double_click(self, event):
+        region = self.tree.identify('region', event.x, event.y)
+
+        if region != 'heading':
+            #print('column ' + str(self.tree.identify_column(event.x)))
+            # print content of cell for copy&paste
+            print( self.tree.item(self.tree.focus())['values'][int(self.tree.identify_column(event.x)[1:])-1])
+            
+            
+        
 
 class DataTreeview(Treeview):
     # datalist is a list of rowlists
@@ -261,6 +272,7 @@ lbl_title.pack()
 
 # frame1 (csv file view)
 tv_keywords = TreeBrowser(frame1, ('RegEx1', 'RegEx2', 'Comment'), REGEXDATA)
+tv_keywords.tree.bind("<Double-1>", tv_keywords.on_double_click)
 btn_createSheet = Button(
     master = frame1,
     text = 'Create ' + WORKBOOK_FILENAME,
@@ -289,6 +301,7 @@ def character_limit(entry_text):
     if len(entry_text.get()) > 4:
         entry_text.set(entry_text.get()[:5])
 tv_files = TreeBrowser(frame2, ('Path', 'Filename'), GetFilesSeparate())
+tv_files.tree.bind("<Double-1>", tv_files.on_double_click)
 ext_desc = Label(frame2, text = 'Input File Extension:')
 entry_text = StringVar()
 ext_input = Entry(frame2, width = 10, textvariable=entry_text)
@@ -317,6 +330,7 @@ lbl_preview = Label(
     master = frame3,
     text = 'What will be changed:')
 tv_preview = TreeBrowser(frame3, ('Filename', 'Before', 'After', 'Comment'), PreviewReplaceText(REGEXDATA))
+tv_preview.tree.bind("<Double-1>", tv_preview.on_double_click)
 btn_preview = Button(
     master = frame3,
     text = 'Refresh preview window',
