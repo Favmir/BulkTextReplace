@@ -7,13 +7,11 @@ The `BulkReplacer.py` script needs a csv file named `BulkReplacer_List.csv`.
 Requirements for the csv file:
 * formatted in `utf-8-sig`
 * use ` `(Tab key) as delimiter (multiple tabs in a row are considered as one tab)
-* have `sep= ` as the first line (this is so that excel can understand the file, but I recommend just using plain notepad)
 
 The program will generate a csv file for you if there isn't one.
 
 Example of `BulkReplacer_List.csv`:
 ```
-sep=  
 Your fine.          You're fine.    Fixes grammar
 ([^…])…([^…])       \1……\2          Doulbe the Ellipses
 ([^\n ""—])(—[\s])  \1 \2           Spacing for Em Dash
