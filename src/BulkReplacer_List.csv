@@ -1,4 +1,5 @@
-﻿([^\n])  ([^\n])	\1 \2	Double space typo fix
+sep= 
+([^\n])  ([^\n])	\1 \2	Double space typo fix
 ([^…])…([^…])		\1……\2	Double the length of Ellipsis
 ([^\s""'—])(—[\s])	\1 \2	Put space at front of Em dash if it's followed by a space
 (\s)-(\s)			\1—\2	Hyphen to Em dash
