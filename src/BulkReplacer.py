@@ -198,11 +198,11 @@ def LoadSheet():
         regList = list()
         #next(f) #skip the first line with 'sep= '
         
-        #check if the current line has no tabs
-        #if so, ignore the line
         for line in f:
+            #check if the current line has no tabs
+            #if so, ignore the line
             if(line.count('\t') == 0):
-                print('No tab found in line, ignoring ',line)
+                print('No tab found, ignoring following line: ',line)
                 continue
             line = re.sub('[\t]+','\t',line)
             #insert third column when there's only two columns
