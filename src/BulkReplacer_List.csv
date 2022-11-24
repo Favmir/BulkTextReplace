@@ -1,13 +1,19 @@
-sep= 
+————— Common Typo —————
 ([^\n])  ([^\n])	\1 \2	Double space typo fix
 ([^…])…([^…])		\1……\2	Double the length of Ellipsis
 ([^\s""'—])(—[\s])	\1 \2	Put space at front of Em dash if it's followed by a space
 (\s)-(\s)			\1—\2	Hyphen to Em dash
 ([0-9])-([0-9])		\1–\2	Hyphen to En dash(connecting two numbers)
+
+————— Conversion —————
 <<([^s])	《\1			Title for Korean literature
 (^s)>>		\1》			Title for Korean literature
 =>			→ 			Arrow
 <=			← 			Arrow
+\n(?!—{25})(—{5,})\n	\n—————————————————————————\n			Section break
+\n(?!={29})(={5,})\n	\n=============================\n		Section break
+
+————— Korean Typo —————
 꺠			깨			Korean Typo
 꺤			깬			Korean Typo
 꺴			깼			Korean Typo
@@ -38,5 +44,4 @@ sep=
 곘			겠			Korean Typo
 꼐			께			Korean Typo
 꺠			깨			Korean Typo
-\n(?!—{25})(—{5,})\n	\n—————————————————————————\n			Section break
-\n(?!={29})(={5,})\n	\n=============================\n		Section break
+

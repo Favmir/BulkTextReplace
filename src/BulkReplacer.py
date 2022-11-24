@@ -197,7 +197,13 @@ def LoadSheet():
     with open(WORKBOOK_PATH, newline = '', encoding = 'utf-8-sig') as f:
         regList = list()
         #next(f) #skip the first line with 'sep= '
+        
+        #check if the current line has no tabs
+        #if so, ignore the line
         for line in f:
+            if(line.count('\t') == 0):
+                print('No tab found in line, ignoring ',line)
+                continue
             line = re.sub('[\t]+','\t',line)
             #insert third column when there's only two columns
             line = re.sub('^([^\t]+)\t([^\r\n\t]+)([\r\n]+)$', '\\1\t\\2\t\\3', line)
