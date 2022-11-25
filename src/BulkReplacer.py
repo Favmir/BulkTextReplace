@@ -103,7 +103,7 @@ def ReplaceSpecialChars(word: str) -> str:
     replaceList = [
         ['\t','␉'],
         ['\n','␤'],
-        [' ',' ␣ ']  # also could use ⎵
+        [' ',' ␣ ']  # also could use ⎵  ⌫  ␠
         ]
     for row in replaceList:
         word = re.sub(row[0], row[1], word)
@@ -131,7 +131,7 @@ def PreviewReplaceText(wordlist: list[list[str]]) -> list[list[str]]:
                         foundtexta = restofcontent[max(0,found.span()[1]): min(len(restofcontent),
                             found.span()[1]+ellipsisLen)]
                         changedtext = re.sub(row[0], row[1], foundtext)
-                        matches.append( (filename, ReplaceSpecialChars('…'+foundtextb+foundtext+foundtexta+'…'), ReplaceSpecialChars('…'+foundtextb+changedtext+foundtexta+'…'), row[2]) )
+                        matches.append( (filename, ReplaceSpecialChars('… '+foundtextb+foundtext+foundtexta+' …'), ReplaceSpecialChars('… '+foundtextb+changedtext+foundtexta+' …'), row[2]) )
                         
                         #content = restofcontent[0:found.span()[0]] + changedtext + restofcontent[found.span()[1]:] # apply change for next regex
 
