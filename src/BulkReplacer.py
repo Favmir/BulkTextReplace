@@ -237,8 +237,10 @@ rootwindow.rowconfigure(3,weight = 0)   # bottom frame
 rootwindow.columnconfigure(0,weight = 0)
 rootwindow.columnconfigure(1,weight = 2)
 
+# Actual font used for treeview
+# Used KR version of Noto Sans to display characters like '떄'
 TreesStyle=Style()
-TreesStyle.configure("Treeview", font=('Noto Sans', 15), rowheight=30)
+TreesStyle.configure("Treeview", font=('Noto Sans KR', 15), rowheight=30)
 
 # frame1 (csv file view)
 # frame2 (file browser for *.EXTENSION files)
