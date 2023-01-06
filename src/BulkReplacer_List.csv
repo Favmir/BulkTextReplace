@@ -4,6 +4,8 @@
 ([^\s""'—])(—[\s])	\1 \2	Put space at front of Em dash if it's followed by a space
 (\s)-(\s)			\1—\2	Hyphen to Em dash
 ([0-9])-([0-9])		\1–\2	Hyphen to En dash(connecting two numbers)
+([\r\n])'([^"]+)"([\r\n])	\1"\2"\3	Double quotes typo fix
+([\r\n])"([^"]+)'([\r\n])	\1"\2"\3	Double quotes typo fix
 
 ————— Conversion —————
 <<([^s])	《\1			Title for Korean literature

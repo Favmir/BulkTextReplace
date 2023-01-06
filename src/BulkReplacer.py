@@ -231,10 +231,10 @@ default_font = tkinter.font.nametofont("TkDefaultFont")
 default_font.config(family= 'Noto Sans', size = 10)
 rootwindow['bg'] = 'grey'
 rootwindow.rowconfigure(0,weight = 0)   # title frame
-rootwindow.rowconfigure(1,weight = 3)
-rootwindow.rowconfigure(2,weight = 0)
+rootwindow.rowconfigure(1,weight = 1)
+rootwindow.rowconfigure(2,weight = 3)
 rootwindow.rowconfigure(3,weight = 0)   # bottom frame
-rootwindow.columnconfigure(0,weight = 0)
+rootwindow.columnconfigure(0,weight = 1)
 rootwindow.columnconfigure(1,weight = 2)
 
 # Actual font used for treeview
@@ -259,6 +259,7 @@ framebottom.grid(row = 3, column = 0, columnspan = 2, pady = 5)
 
 frame1.rowconfigure(0,weight = 0)
 frame1.rowconfigure(1,weight = 1)
+frame2.rowconfigure(0,weight = 1)
 frame2.columnconfigure(0,weight = 1)
 frame3.rowconfigure(0,weight = 0)
 frame3.rowconfigure(1,weight = 1)
