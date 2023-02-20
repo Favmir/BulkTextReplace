@@ -362,3 +362,83 @@ btn_run.grid(row = 2, column = 0, pady = 5)
 
 
 rootwindow.mainloop()
+
+
+
+
+'''
+I'm going to make a python function interpret() that takes custom script string, interprets it, and return boolean. For example:
+
+text = "this is the sample text 1.9."
+expression = "MATCHES([0-9].[0-9])==1 AND MATCHES([a-zA-Z])>0 OR NOT TRUE"
+
+function interpret(expression, text) first separates the expression by AND, OR, XOR etc. Then it runs re.match([0-9].[0-9]).length == 1
+'''
+# text = "this is the sample text 1.9."
+# expression = "MATCHES([0-9].[0-9])==1 AND MATCHES([a-zA-Z])>0 OR FALSE"
+
+
+# convert MATCHES() in expression into numbers
+def preProcess(expression, text):
+    MatchMATCHES = re.search(r'MATCHES\((.*)\)', expression)
+    while(MatchMATCHES != None):
+        count = len(re.findall(MatchMATCHES.group(1), text))
+        expression = re.sub(r'MATCHES\((.*)\)', str(count), expression, 1)
+        MatchMATCHES = re.search(r'MATCHES\((.*)\)', expression)
+    return expression
+
+def parseLogic(expression:str, text:str) -> bool:
+    # split by ' AND ', ' OR ' in expression
+    # then run re.match() on each of them
+    # then return the result
+
+    # split expression in two by first ' OR '
+    MatchOR = re.search(r'[\s]+OR[\s]+', expression)
+    MatchAND = re.search(r'[\s]+OR[\s]+', expression)
+    if(MatchOR == None and MatchAND == None):
+        return parseComp(expression, text)
+    if(MatchAND == None or MatchOR < MatchAND):
+        return parseComp(expression[:MatchOR.start()], text) or parseLogic(expression[MatchOR.end():], text)
+    elif(MatchOR == None or MatchAND < MatchOR):
+        return parseComp(expression[:MatchAND.start()], text) and parseLogic(expression[MatchAND.end()], text)
+    else:
+        Exception("OR and AND is at the same location. Somehow.")
+        
+
+# NOT, >, <, ==, !=, >=, <=
+def parseComp(expression, text):
+    MatchNOT = re.search(r'NOT[\s]+', expression)
+    if(MatchNOT != None and MatchNOT.start() == 0):
+        return not parseComp(expression[MatchNOT.end():], text)
+    if(expression == 'TRUE'):
+        return True
+    if(expression == 'FALSE'):
+        return False
+    # if expression is just numbers and operators, then return the result
+    if(re.match(r'[^0-9+\-*/\s]', expression) == None):
+        return eval(expression)
+    MatchGTE = re.search(r'[\s]*(>=|=>)[\s]*', expression)
+    if(MatchGTE != None):
+        return parseComp(expression[:MatchGTE.start()], text) >= parseComp(expression[MatchGTE.end():], text)
+    MatchLTE = re.search(r'[\s]*(<=|=<)[\s]*', expression)
+    if(MatchLTE != None):
+        return parseComp(expression[:MatchLTE.start()], text) <= parseComp(expression[MatchLTE.end():], text)
+    MatchGT = re.search(r'[\s]*>[\s]*', expression)
+    if(MatchGT != None):
+        return parseComp(expression[:MatchGT.start()], text) > parseComp(expression[MatchGT.end():], text)
+    MatchLT = re.search(r'[\s]*<[\s]*', expression)
+    if(MatchLT != None):
+        return parseComp(expression[:MatchLT.start()], text) < parseComp(expression[MatchLT.end():], text)
+    MatchEQ = re.search(r'[\s]*==[\s]*', expression)
+    if(MatchEQ != None):
+        return parseComp(expression[:MatchEQ.start()], text) == parseComp(expression[MatchEQ.end():], text)
+    MatchNEQ = re.search(r'[\s]*!=[\s]*', expression)
+    if(MatchNEQ != None):
+        return parseComp(expression[:MatchNEQ.start()], text) != parseComp(expression[MatchNEQ.end():], text)
+    MatchEQ = re.search(r'[\s]*=[\s]*', expression)
+    if(MatchEQ != None):
+        return parseComp(expression[:MatchEQ.start()], text) == parseComp(expression[MatchEQ.end():], text)
+
+    Exception("Invalid expression: " + expression)
+
+    
