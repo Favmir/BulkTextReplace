@@ -360,7 +360,6 @@ tv_preview.tree.column(2, width = 250, minwidth = 150)
 tv_preview.tree.column(3, width = 200, minwidth = 100)
 btn_run.grid(row = 2, column = 0, pady = 5)
 
-
 rootwindow.mainloop()
 
 
@@ -377,17 +376,31 @@ function interpret(expression, text) first separates the expression by AND, OR, 
 # text = "this is the sample text 1.9."
 # expression = "MATCHES([0-9].[0-9])==1 AND MATCHES([a-zA-Z])>0 OR FALSE"
 
-
 # convert MATCHES() in expression into numbers
-def preProcess(expression, text):
-    MatchMATCHES = re.search(r'MATCHES\((.*)\)', expression)
+def preprocess(expression, text):
+    MatchMATCHES = re.search(r'MATCHES\(', expression)
     while(MatchMATCHES != None):
-        count = len(re.findall(MatchMATCHES.group(1), text))
-        expression = re.sub(r'MATCHES\((.*)\)', str(count), expression, 1)
-        MatchMATCHES = re.search(r'MATCHES\((.*)\)', expression)
+        innerStart = MatchMATCHES.end()
+        innerEnd = innerStart
+        depth = 1
+        for char in expression[innerStart:]:
+            if char == '(':
+                depth += 1
+            elif char == ')':
+                depth -= 1
+            if depth == 0:
+                break
+            innerEnd += 1
+        
+        count = len(re.findall(expression[innerStart:innerEnd], text))
+        expression = expression[:MatchMATCHES.start()] + str(count) + expression[innerEnd+1:]
+        MatchMATCHES = re.search(r'MATCHES\(', expression)
+    if(re.search(r'MATCHES\((.*)\)',expression) != None):
+        Exception("expression containing MATCHES() is not nested properly.")
     return expression
 
-def parseLogic(expression:str, text:str) -> bool:
+# Return True or False by applying the expression
+def parseLogic(expression:str) -> bool:
     # split by ' AND ', ' OR ' in expression
     # then run re.match() on each of them
     # then return the result
@@ -396,20 +409,20 @@ def parseLogic(expression:str, text:str) -> bool:
     MatchOR = re.search(r'[\s]+OR[\s]+', expression)
     MatchAND = re.search(r'[\s]+OR[\s]+', expression)
     if(MatchOR == None and MatchAND == None):
-        return parseComp(expression, text)
+        return parseComp(expression)
     if(MatchAND == None or MatchOR < MatchAND):
-        return parseComp(expression[:MatchOR.start()], text) or parseLogic(expression[MatchOR.end():], text)
+        return parseComp(expression[:MatchOR.start()]) or parseLogic(expression[MatchOR.end():])
     elif(MatchOR == None or MatchAND < MatchOR):
-        return parseComp(expression[:MatchAND.start()], text) and parseLogic(expression[MatchAND.end()], text)
+        return parseComp(expression[:MatchAND.start()]) and parseLogic(expression[MatchAND.end()])
     else:
         Exception("OR and AND is at the same location. Somehow.")
         
 
 # NOT, >, <, ==, !=, >=, <=
-def parseComp(expression, text):
+def parseComp(expression):
     MatchNOT = re.search(r'NOT[\s]+', expression)
     if(MatchNOT != None and MatchNOT.start() == 0):
-        return not parseComp(expression[MatchNOT.end():], text)
+        return not parseComp(expression[MatchNOT.end():])
     if(expression == 'TRUE'):
         return True
     if(expression == 'FALSE'):
@@ -419,25 +432,25 @@ def parseComp(expression, text):
         return eval(expression)
     MatchGTE = re.search(r'[\s]*(>=|=>)[\s]*', expression)
     if(MatchGTE != None):
-        return parseComp(expression[:MatchGTE.start()], text) >= parseComp(expression[MatchGTE.end():], text)
+        return parseComp(expression[:MatchGTE.start()]) >= parseComp(expression[MatchGTE.end():])
     MatchLTE = re.search(r'[\s]*(<=|=<)[\s]*', expression)
     if(MatchLTE != None):
-        return parseComp(expression[:MatchLTE.start()], text) <= parseComp(expression[MatchLTE.end():], text)
+        return parseComp(expression[:MatchLTE.start()]) <= parseComp(expression[MatchLTE.end():])
     MatchGT = re.search(r'[\s]*>[\s]*', expression)
     if(MatchGT != None):
-        return parseComp(expression[:MatchGT.start()], text) > parseComp(expression[MatchGT.end():], text)
+        return parseComp(expression[:MatchGT.start()]) > parseComp(expression[MatchGT.end():])
     MatchLT = re.search(r'[\s]*<[\s]*', expression)
     if(MatchLT != None):
-        return parseComp(expression[:MatchLT.start()], text) < parseComp(expression[MatchLT.end():], text)
+        return parseComp(expression[:MatchLT.start()]) < parseComp(expression[MatchLT.end():])
     MatchEQ = re.search(r'[\s]*==[\s]*', expression)
     if(MatchEQ != None):
-        return parseComp(expression[:MatchEQ.start()], text) == parseComp(expression[MatchEQ.end():], text)
+        return parseComp(expression[:MatchEQ.start()]) == parseComp(expression[MatchEQ.end():])
     MatchNEQ = re.search(r'[\s]*!=[\s]*', expression)
     if(MatchNEQ != None):
-        return parseComp(expression[:MatchNEQ.start()], text) != parseComp(expression[MatchNEQ.end():], text)
+        return parseComp(expression[:MatchNEQ.start()]) != parseComp(expression[MatchNEQ.end():])
     MatchEQ = re.search(r'[\s]*=[\s]*', expression)
     if(MatchEQ != None):
-        return parseComp(expression[:MatchEQ.start()], text) == parseComp(expression[MatchEQ.end():], text)
+        return parseComp(expression[:MatchEQ.start()]) == parseComp(expression[MatchEQ.end():])
 
     Exception("Invalid expression: " + expression)
 
